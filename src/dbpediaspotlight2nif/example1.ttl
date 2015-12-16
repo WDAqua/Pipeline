@@ -7,7 +7,7 @@
                              a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
                              a	"nif:Context" ;
                   nif:endIndex	"22"^^xsd:nonNegativeInteger ;
-                 nif:sourceUrl	<> ;
+#                 nif:sourceUrl	<> ;
                   nif:isString	"Barack Obama in London" ;
                 nif:beginIndex	"0"^^xsd:nonNegativeInteger .
 
