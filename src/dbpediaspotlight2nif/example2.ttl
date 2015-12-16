@@ -1,0 +1,115 @@
+# input: Obama New York
+@prefix itsrdf: <http://www.w3.org/2005/11/its/rdf#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> .
+
+@base <urn:uuid:630454ad-bbe5-456a-b6a4-33b07e1b7f77>
+
+
+<#char=0,5>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"0"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"5"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"Obama" ;
+                nif:confidence	"0.19086912274360657" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/Michelle_Obama" .
+
+<#char=6,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"6"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"New York" ;
+                nif:confidence	"0.11861498653888702" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/Province_of_New_York" .
+
+<#char=6,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"6"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"New York" ;
+                nif:confidence	"0.0898849293589592" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/New_York_metropolitan_area" .
+
+<#char=6,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"6"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"New York" ;
+                nif:confidence	"0.1240076869726181" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/Roman_Catholic_Archdiocese_of_New_York" .
+
+<#char=6,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"6"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"New York" ;
+                nif:confidence	"0.12264955788850784" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/New_York" .
+
+<#char=6,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"6"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"New York" ;
+                nif:confidence	"0.18493473529815674" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/New_York,_New_York_%28film%29" .
+
+<#char=0,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                 nif:sourceUrl	<> ;
+                             a	"nif:Context" ;
+                nif:beginIndex	"0"^^xsd:nonNegativeInteger ;
+                  nif:isString	"Obama New York" ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger .
+
+<#char=6,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"6"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"New York" ;
+                nif:confidence	"0.101361945271492" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/New_York_City" .
+
+<#char=6,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"6"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"New York" ;
+                nif:confidence	"0.19243299961090088" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/New_York_%28magazine%29" .
+
+<#char=6,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"6"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"New York" ;
+                nif:confidence	"0.07849885523319244" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/Pennsylvania_Station_%28New_York_City%29" .
+
+<#char=6,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"6"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"New York" ;
+                nif:confidence	"0.11058887094259262" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/West_New_York,_New_Jersey" .
+
+<#char=6,14>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"6"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"14"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"New York" ;
+                nif:confidence	"0.11435925960540771" ;
+          nif:referenceContext	"<#char=0,14>" ;
+             itsrdf:taIdentRef	"http://dbpedia.org/resource/Manhattan" .
+
