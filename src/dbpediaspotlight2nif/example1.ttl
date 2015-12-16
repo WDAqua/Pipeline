@@ -3,8 +3,6 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> .
 @base <urn:uuid:b4500d48-5c64-4419-b805-56bed4f2fda6> .
-
-
 <#char=0,22>
                              a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
                              a	"nif:Context" ;
