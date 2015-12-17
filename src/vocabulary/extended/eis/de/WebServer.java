@@ -33,6 +33,21 @@ public class WebServer extends NanoHTTPD {
 		    }
 		    return new NanoHTTPD.Response(Status.OK, "text/turtle", fis);
 	    }
+	    
+	    if (uri.equals("/DBpediaOutput.ttl")){
+	    	String answer = "";
+		    FileInputStream fis = null;
+		    try {
+		        fis = new FileInputStream("/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/DBpediaOutput.ttl");
+		    } catch (FileNotFoundException e) {
+		        // TODO Auto-generated catch block
+		    	System.out.println(uri+" caught in Exeption");
+		    	
+		        e.printStackTrace();
+		    }
+		    return new NanoHTTPD.Response(Status.OK, "text/turtle", fis);
+	    }
+	    
 	    if (uri.equals("/Question")){
 	    	String answer = "";
 		    FileInputStream fis = null;

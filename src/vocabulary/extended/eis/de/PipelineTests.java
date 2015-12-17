@@ -13,8 +13,8 @@ public class PipelineTests {
     public void executeTest(String questionstring){
         Pipeline myPipeline = new Pipeline();
         
-        Pipeline.replaceQuestion(questionstring);
-        assertEquals(this.questionstring, myPipeline.getQuestion()); // myPipeline.execute() needs to return a boolean
+        DBpediaSpotlight.replaceQuestion(questionstring);
+        assertEquals(this.questionstring, myPipeline.spotlight.getQuestion()); // myPipeline.execute() needs to return a boolean
     }
 
 }

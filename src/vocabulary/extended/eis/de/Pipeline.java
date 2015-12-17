@@ -59,7 +59,9 @@ public class Pipeline {
 	
 	public void loadTripleStore(String content)
 	{
+		
 		UpdateRequest request = UpdateFactory.create(content) ;
+		
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
 	    proc.execute() ;
 	}
@@ -80,37 +82,7 @@ public class Pipeline {
 	//Object getOutput(QAComponent comp, Object input){
 		//return comp.process(input);
 	//}
-	public String getQuestion()
-	{
-		String path="/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/Question";// path to the file
-		String question = "";
-		
-		try{
-			
-			BufferedReader bReader = new BufferedReader(new FileReader(path));
-			question = bReader.readLine();
-			
-		}catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		return question;
-	}
-	public static void replaceQuestion(String question)
-	{
-		String path = "/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/Question";// path to the file
-		try{
-			
-			BufferedWriter bWriter = new BufferedWriter(new FileWriter(path,false));
-			bWriter.write(question);
-			bWriter.close();
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
-		
-	}
+	
 	public void initTripleStore()
 	{
 				String q="CLEAR ALL";
@@ -168,7 +140,7 @@ public class Pipeline {
 		//ptest.executeTest(questionstring);
 		
 		Pipeline pline = new Pipeline();
-		pline.replaceQuestion(questionstring);
+		pline.spotlight.replaceQuestion(questionstring);
 		pline.initTripleStore();
 	    
 		String questionuri = "PREFIX qa: <http://www.wdaqua.eu/qa#>";
@@ -214,13 +186,25 @@ public class Pipeline {
 			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 			String urlString = "";
 			String current;
-			
+			try{
+				BufferedWriter bw = new BufferedWriter(new FileWriter("/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/DBpediaOutput.ttl"));
 			while ((current = in.readLine()) != null) {
 				urlString += current;
+				bw.newLine();
+				bw.write(current);
 				System.out.println(current);
 			}
-			pline.writeFile("/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/DBpediaOutput.ttl", urlString);
-			pline.loadTripleStore("LOAD </Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/DBpediaOutput.ttl> INTO GRAPH <temp>");
+			bw.close();
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+			
+			
+			
+			
+			
+			//pline.writeFile("/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/DBpediaOutput.ttl", urlString);
+			pline.loadTripleStore("LOAD <http://localhost:8080/DBpediaOutput.ttl>");
 			System.out.println("The aNS IS: "+urlString);
 			
 			//System.out.println("The data received from service is: "+rstclnt.getResults(add+qstn));
