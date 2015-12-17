@@ -29,7 +29,7 @@ public class DBpediaSpotlight implements QAComponent {
 	}
 	public static void replaceQuestion(String question)
 	{
-		String path = "/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/Question";// path to the file
+		String path = "src/vocabulary/extended/eis/de/Question";// path to the file
 		try{
 			
 			BufferedWriter bWriter = new BufferedWriter(new FileWriter(path,false));

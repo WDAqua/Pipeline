@@ -10,6 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -57,11 +58,8 @@ public class Pipeline {
 	
 	
 	
-	public void loadTripleStore(String content)
-	{
-		
-		UpdateRequest request = UpdateFactory.create(content) ;
-		
+	public void loadTripleStore(String sparqlQuery){
+		UpdateRequest request = UpdateFactory.create(sparqlQuery) ;
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
 	    proc.execute() ;
 	}
@@ -123,9 +121,7 @@ public class Pipeline {
 	}
 	
 	public static void main(String[] args) throws InterruptedException, IOException {
-		
-		//PREPARE THE TRIPLESOTRE
-		
+		org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
 		//Set up a Web Server that exposes the QAOntology
 		try {
             new WebServer();
@@ -133,85 +129,68 @@ public class Pipeline {
         catch( IOException ioe ) {
             System.err.println( "Couldn't start server:\n" + ioe );
         }
-		org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
-		//Clear the database
-		String questionstring = "In which city did John F. Kennedy die?";
-		//PipelineTests ptest = new PipelineTests();
-		//ptest.executeTest(questionstring);
 		
 		Pipeline pline = new Pipeline();
-		pline.spotlight.replaceQuestion(questionstring);
+		
+		//The triplestore is initialized with the WADM, the QA ontology and some initial structures
 		pline.initTripleStore();
 	    
-		String questionuri = "PREFIX qa: <http://www.wdaqua.eu/qa#>";
-		
-		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#>SELECT ?questionuri WHERE {?questionuri a qa:Question}";
-		
-		
+		//Execute a SPARQL query to retrive the URI where the question is exposed
+		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#> SELECT ?questionuri WHERE {?questionuri a qa:Question}";
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService( endpoint, query );
 		ResultSet result=qExe.execSelect();
-		
-		ArrayList<String> list = new ArrayList<String>();
+		String uriQuestion = "";
 		while (result.hasNext()){
-			list.add(result.next().getResource("questionuri").toString());
-			System.out.println(list.get(list.size()-1));
+			uriQuestion=result.next().getResource("questionuri").toString();
 		}
 		
-		// this part consume python service from our REST client and print output.
+		//Retrive the question using an HTTP request 
 		RESTClient rstclnt = new RESTClient();
-		String add = "http://localhost:8099/";
+		String question = rstclnt.getResults(uriQuestion);
 		
-		//String address="";// assign the url for the service to the address string
+		//Send the question to the DBpedia service
+		String a="http://localhost:8099/"+URLEncoder.encode(question, "UTF-8");
+		String qstn = rstclnt.getResults(a);
+		System.out.println(qstn);
 		
-		for(String address: list)
-		{
-			String qstn = rstclnt.getResults(address);
-			
-			String qns[] = qstn.split(" ");
-			String append = add+String.join("%20", qns);
-			System.out.println("The Url is= "+append);
-			
-			
-			
-			URL url = new URL(append);
-			URLConnection urlConnection = url.openConnection();
-			HttpURLConnection connection = null;
-			if (urlConnection instanceof HttpURLConnection) {
-				connection = (HttpURLConnection) urlConnection;
-			} else {
-				System.out.println("Please enter an HTTP URL.");
-				System.exit(0);
-			}
-			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			String urlString = "";
-			String current;
-			try{
-				BufferedWriter bw = new BufferedWriter(new FileWriter("/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/DBpediaOutput.ttl"));
-			while ((current = in.readLine()) != null) {
-				urlString += current;
-				bw.newLine();
-				bw.write(current);
-				System.out.println(current);
-			}
-			bw.close();
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-			
-			
-			
-			
-			
-			//pline.writeFile("/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/DBpediaOutput.ttl", urlString);
-			pline.loadTripleStore("LOAD <http://localhost:8080/DBpediaOutput.ttl>");
-			System.out.println("The aNS IS: "+urlString);
-			
-			//System.out.println("The data received from service is: "+rstclnt.getResults(add+qstn));
-		}
-//		//Pipeline p = new Pipeline();
-//		//String out= p.queryAnswer("ask question ....");
-//		System.out.println(new Pipeline().queryAnswer("ask question ......"));
+		//Write into an empty file the result of the DBpedia wrapper to expose the result as a URI
+		pline.writeFile("src/vocabulary/extended/eis/de/DBpediaOutput.ttl", qstn);
+		
+		//The exposed result is loaded into a temporary graph
+		pline.loadTripleStore("LOAD <http://localhost:8080/DBpediaOutput.ttl> INTO GRAPH <http://www.wdaqua.eu/qa#tmp>");
+		
+		sparqlQuery="prefix itsrdf: <http://www.w3.org/2005/11/its/rdf#> "
+			 +"prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> "
+			 +"prefix qa: <http://www.wdaqua.eu/qa#> "
+			 +"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
+			 +""
+			 +"INSERT { "
+			 +"  ?a a qa:AnnotationOfNE . "
+			 +"  ?a oa:hasBody ?NE . "
+			 +"  ?a oa:hasTarget [ "
+			 +"           a    oa:SpecificResource; "
+             +"           oa:hasSource    <URIQuestion>; "
+             +"           oa:hasSelector  ?s "
+             +"] . "
+             +"?a qa:score ?conf "
+			 +"} " 
+			 +"WHERE { "
+			 +"  select ?a ?s ?NE ?conf "
+			 +"  where { "
+			 +"    graph <http://www.wdaqua.eu/qa#tmp> { "
+			 +"      ?s itsrdf:taIdentRef ?NE . "
+			 +"      OPTIONAL {?s nif:confidence ?conf} . "
+			 +"      BIND (IRI(CONCAT(str(?s),'_',str(RAND()))) AS ?a) . "
+      		 +"    } "
+    		 +"  }"
+			 +"}";
+		pline.loadTripleStore(sparqlQuery);
+		
+		sparqlQuery="ADD <http://www.wdaqua.eu/qa#tmp> to  DEFAULT";
+		pline.loadTripleStore(sparqlQuery);
+		sparqlQuery="DROP GRAPH <http://www.wdaqua.eu/qa#tmp>";
+		pline.loadTripleStore(sparqlQuery);
 	}
 
 }

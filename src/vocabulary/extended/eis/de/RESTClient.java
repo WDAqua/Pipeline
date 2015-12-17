@@ -42,7 +42,7 @@ public class RESTClient {
 
 			// Simply iterate through XML response and show on console.
 			while ((output = br.readLine()) != null) {
-				result+=output;
+				result+=output+"\n";
 				//System.out.println(output);
 			}
 
