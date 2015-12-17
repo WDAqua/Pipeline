@@ -27,43 +27,30 @@ import org.apache.jena.update.UpdateRequest;
 
 public class Pipeline {
 
+	//Endpoint of Stardog
 	private static String endpoint="http://admin:admin@localhost:5820/question/query";
+	
 	
 	DBpediaSpotlight spotlight = new DBpediaSpotlight();
 	PattyRelationIdentifier relationmatching = new PattyRelationIdentifier();
 	
 	Sina sinatext = new Sina();
-
-	public Pipeline() {
-		
-	}
-	
-	public void init(){
-		
-	}
 	
 	public String queryAnswer(String query){
-		
 		String spotlightoutput = spotlight.process(query);
 		String pattyoutput = relationmatching.process(spotlightoutput);
-		//String QGOutput = queryGeneration.process(QAOutput + ESOutput);
-		//String QEOutput = queryExecution.process(QGOutput);
 		String answer = sinatext.process(pattyoutput);
-		
-		//getOutput(spotlight, query);
-		
 		return answer;
-		
 	}
 	
-	
-	
+	//Function to perform update requests to the endpoint
 	public void loadTripleStore(String sparqlQuery){
 		UpdateRequest request = UpdateFactory.create(sparqlQuery) ;
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
 	    proc.execute() ;
 	}
 	
+	//Function that writes to a File some String 
 	public void writeFile(String fileName,String content)
 	{
 		try{
@@ -76,48 +63,47 @@ public class Pipeline {
 	}
 	
 	
-	
-	//Object getOutput(QAComponent comp, Object input){
-		//return comp.process(input);
-	//}
-	
+	//Function that initializes the triplestore with the WADM + the QA ontology + some inital structures
 	public void initTripleStore()
 	{
+				//Clear all tables of the database
 				String q="CLEAR ALL";
-				UpdateRequest request = UpdateFactory.create(q) ;
-			    UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
-			    proc.execute() ;
-			    
+				loadTripleStore(q);
+				
 			    //Load the Open Annotation Ontology
 			    q="LOAD <http://www.openannotation.org/spec/core/20130208/oa.owl>";
-				request = UpdateFactory.create(q) ;
-			    proc = UpdateExecutionFactory.createRemote(request, endpoint);
-			    proc.execute() ;
+			    loadTripleStore(q);
 				
 				//Load our ontology
 				q="LOAD <http://localhost:8080/QAOntology_raw.ttl>";
-				request = UpdateFactory.create(q) ;
-			    proc = UpdateExecutionFactory.createRemote(request, endpoint);
-			    proc.execute() ;
-			    
+				loadTripleStore(q);
+				
 			    //Prepare the question, answer and dataset objects
 			    q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
 			      "INSERT DATA {<http://localhost:8080/Question> a qa:Question}";
-			    request = UpdateFactory.create(q) ;
-			    proc = UpdateExecutionFactory.createRemote(request, endpoint);
-			    proc.execute();
-			    
+			    loadTripleStore(q);
+			   
 			    q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
 		  	      "INSERT DATA {<http://localhost:8080/Answer> a qa:Answer}";
-		  	    request = UpdateFactory.create(q) ;
-		  	    proc = UpdateExecutionFactory.createRemote(request, endpoint);
-		  	    proc.execute();
+			    loadTripleStore(q);
+		  	    
+			  	q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
+		  		  "INSERT DATA {<http://localhost:8080/Dataset> a qa:Dataset}";
+			  	loadTripleStore(q);
 			  	
-			  	  q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
-		  		     "INSERT DATA {<http://localhost:8080/Dataset> a qa:Dataset}";
-			    request = UpdateFactory.create(q) ;
-			    proc = UpdateExecutionFactory.createRemote(request, endpoint);
-			    proc.execute();
+			  	//Make the first two annotations
+			  	q="PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
+			  	 +"PREFIX qa: <http://www.wdaqua.eu/qa#> "
+			  	 +"INSERT DATA { "
+			  	 +"<anno1> a  oa:AnnotationOfQuestion; "
+				 +"   oa:hasTarget <URIQuestion> ;"
+				 +"   oa:hasBody   <URIAnswer>   ."
+				 +"<anno2> a  oa:AnnotationOfQuestion;"
+				 +"   oa:hasTarget <URIQuestion> ;"
+				 +"   oa:hasBody   <URIDataset> "
+				 +"}";  
+				loadTripleStore(q);
+			   
 	}
 	
 	public static void main(String[] args) throws InterruptedException, IOException {
@@ -135,17 +121,14 @@ public class Pipeline {
 		//The triplestore is initialized with the WADM, the QA ontology and some initial structures
 		pline.initTripleStore();
 	    
-		//Execute a SPARQL query to retrive the URI where the question is exposed
+		//Execute a SPARQL query to retrieve the URI where the question is exposed
 		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#> SELECT ?questionuri WHERE {?questionuri a qa:Question}";
 		Query query = QueryFactory.create(sparqlQuery);
-		QueryExecution qExe = QueryExecutionFactory.sparqlService( endpoint, query );
+		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query );
 		ResultSet result=qExe.execSelect();
-		String uriQuestion = "";
-		while (result.hasNext()){
-			uriQuestion=result.next().getResource("questionuri").toString();
-		}
+		String uriQuestion =result.next().getResource("questionuri").toString();
 		
-		//Retrive the question using an HTTP request 
+		//Retrieve the question using an HTTP request 
 		RESTClient rstclnt = new RESTClient();
 		String question = rstclnt.getResults(uriQuestion);
 		
@@ -160,6 +143,7 @@ public class Pipeline {
 		//The exposed result is loaded into a temporary graph
 		pline.loadTripleStore("LOAD <http://localhost:8080/DBpediaOutput.ttl> INTO GRAPH <http://www.wdaqua.eu/qa#tmp>");
 		
+		//The binding is applied
 		sparqlQuery="prefix itsrdf: <http://www.w3.org/2005/11/its/rdf#> "
 			 +"prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> "
 			 +"prefix qa: <http://www.wdaqua.eu/qa#> "
@@ -187,10 +171,11 @@ public class Pipeline {
 			 +"}";
 		pline.loadTripleStore(sparqlQuery);
 		
+		//All triples of the graph <http://www.wdaqua.eu/qa#tmp> are moved to the default graph 
 		sparqlQuery="ADD <http://www.wdaqua.eu/qa#tmp> to  DEFAULT";
 		pline.loadTripleStore(sparqlQuery);
+		//The temporary graph is dropped
 		sparqlQuery="DROP GRAPH <http://www.wdaqua.eu/qa#tmp>";
 		pline.loadTripleStore(sparqlQuery);
 	}
-
 }
