@@ -178,6 +178,8 @@ public class Pipeline {
              +"           oa:hasSelector  ?s "
              +"  ] . "
              +"  ?a qa:score ?conf . "
+             +"  ?a oa:annotatedBy 'DBpedia Spotlight wrapper' . "
+             +"  ?a oa:annotatedAt ?time "
 			 +"} " 
 			 +"WHERE { "
 			 +"  SELECT ?a ?s ?NE ?begin ?end ?conf "
@@ -187,7 +189,8 @@ public class Pipeline {
 			 +"          ?s nif:beginIndex ?begin . "
 			 +"          ?s nif:endIndex ?end . "
 			 +"          OPTIONAL {?s nif:confidence ?conf} . " 
-			 +"          BIND (IRI(CONCAT(str(?s),'_',str(RAND()))) AS ?a) . " 
+			 +"          BIND (IRI(CONCAT(str(?s),'#',str(RAND()))) AS ?a) . "
+			 +"          BIND(now() as ?time) . "
 			 +"      } " 
 			 +"   }"
 			 +"}";
