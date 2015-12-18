@@ -19,6 +19,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
@@ -150,24 +151,30 @@ public class Pipeline {
 			 +"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 			 +""
 			 +"INSERT { "
+			 +"  ?s a oa:TextPositionSelector . "
+			 +"  ?s oa:start ?begin . "
+			 +"  ?s oa:end ?end . "
+			 +" "
 			 +"  ?a a qa:AnnotationOfNE . "
 			 +"  ?a oa:hasBody ?NE . "
 			 +"  ?a oa:hasTarget [ "
 			 +"           a    oa:SpecificResource; "
              +"           oa:hasSource    <URIQuestion>; "
              +"           oa:hasSelector  ?s "
-             +"] . "
-             +"?a qa:score ?conf "
+             +"  ] . "
+             +"  ?a qa:score ?conf . "
 			 +"} " 
 			 +"WHERE { "
-			 +"  select ?a ?s ?NE ?conf "
-			 +"  where { "
-			 +"    graph <http://www.wdaqua.eu/qa#tmp> { "
-			 +"      ?s itsrdf:taIdentRef ?NE . "
-			 +"      OPTIONAL {?s nif:confidence ?conf} . "
-			 +"      BIND (IRI(CONCAT(str(?s),'_',str(RAND()))) AS ?a) . "
-      		 +"    } "
-    		 +"  }"
+			 +"  SELECT ?a ?s ?NE ?begin ?end ?conf "
+			 +"  WHERE { " 
+			 +"     graph <http://www.wdaqua.eu/qa#tmp> { "
+			 +"          ?s itsrdf:taIdentRef ?NE . " 
+			 +"          ?s nif:beginIndex ?begin . "
+			 +"          ?s nif:endIndex ?end . "
+			 +"          OPTIONAL {?s nif:confidence ?conf} . " 
+			 +"          BIND (IRI(CONCAT(str(?s),'_',str(RAND()))) AS ?a) . " 
+			 +"      } " 
+			 +"   }"
 			 +"}";
 		pline.loadTripleStore(sparqlQuery);
 		
@@ -177,5 +184,50 @@ public class Pipeline {
 		//The temporary graph is dropped
 		sparqlQuery="DROP GRAPH <http://www.wdaqua.eu/qa#tmp>";
 		pline.loadTripleStore(sparqlQuery);
+		pline.secondComponent();
 	}
+	
+	
+	public void secondComponent(){
+		//Execute a SPARQL query to retrieve the URI where the question is exposed
+		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
+							+"SELECT ?questionuri WHERE {?questionuri a qa:Question}";
+		Query query = QueryFactory.create(sparqlQuery);
+		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query );
+		ResultSet result=qExe.execSelect();
+		String uriQuestion =result.next().getResource("questionuri").toString();
+		//Retrieve the question using an HTTP request 
+		RESTClient rstclnt = new RESTClient();
+		String question = rstclnt.getResults(uriQuestion);
+		
+		sparqlQuery= "prefix itsrdf: <http://www.w3.org/2005/11/its/rdf> "
+					+"prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> "
+					+"prefix qa: <http://www.wdaqua.eu/qa#> " 
+					+"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
+					+""
+					+"SELECT ?NE ?begin ?end WHERE { "
+					+"    ?a a qa:AnnotationOfNE . "
+					+"    ?a oa:hasBody ?NE . "
+					+"    ?a oa:hasTarget [ "
+					+"        a    oa:SpecificResource; "
+					+"        oa:hasSource    ?r; "
+					+"        oa:hasSelector  [ "
+					+"              a      oa:TextPositionSelector; "
+                    +"              oa:start        ?begin ; "
+                    +"              oa:end          ?end "
+                    +"        ] " 
+                    +"    ] . "
+					+"} ";
+		query = QueryFactory.create(sparqlQuery);
+		qExe = QueryExecutionFactory.sparqlService(endpoint, query );
+		result=qExe.execSelect();
+		while (result.hasNext()){
+			QuerySolution tmp = result.next();
+			System.out.println(tmp.getLiteral("NE").toString());
+			System.out.println(tmp.getLiteral("begin").getInt());
+			System.out.println(tmp.getLiteral("end").getInt());
+			
+		}
+	}
+	
 }

@@ -12,7 +12,8 @@
 # Introducing new ontology
 
 <http://www.wdaqua.eu/qa> 	rdf:type owl:Ontology ;
- 			 	owl:imports <http://www.openannotation.org/spec/core/20130208/oa.owl> .
+ 			 	owl:imports <http://www.openannotation.org/spec/core/20130208/oa.owl> ;
+				owl:imports <https://raw.githubusercontent.com/NLP2RDF/ontologies/master/nif-core/nif-core.ttl> .
 
 # Introducing classes for question, answer and dataset
 
@@ -286,6 +287,4 @@ select * where {
 
 qa:AnswerType owl:equivalentClass qa:DBpediaTypes .
 qa:PosTag owl:equivalentClass <http://purl.org/olia/olia-top.owl#MorphosyntacticCategory> .
-
-
 
