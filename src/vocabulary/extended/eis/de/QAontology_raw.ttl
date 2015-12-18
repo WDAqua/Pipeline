@@ -102,9 +102,17 @@ qa:AnnoOfPosTag rdf:type owl:Class ;
                                       owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
                                       owl:someValuesFrom qa:PosTag
                                     ] ;
-                
                 rdfs:subClassOf qa:AnnotationQuestion .
 
+qa:NE rdf:type owl:Class .
+
+qa:AnnoOfNE rdf:type owl:Class ;
+
+                owl:equivalentClass [ rdf:type owl:Restriction ;
+                                      owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
+                                      owl:someValuesFrom qa:NE
+                                    ] ;
+                rdfs:subClassOf qa:AnnotationQuestion .
 
 #Imports
 
