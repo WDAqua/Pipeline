@@ -1,4 +1,3 @@
-# example of file example5.ttl was used 
 # input: 
 # Where did Barack Obama graduated?
 # note: done by manual annotations as DBpedia Spotlight is down

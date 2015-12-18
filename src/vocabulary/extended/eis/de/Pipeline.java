@@ -6,12 +6,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -25,6 +28,9 @@ import org.apache.jena.update.UpdateExecutionFactory;
 import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.update.UpdateProcessor;
 import org.apache.jena.update.UpdateRequest;
+import org.apache.lucene.queryparser.classic.ParseException;
+
+import patty_wrapper.Indexer;
 
 public class Pipeline {
 
@@ -107,7 +113,7 @@ public class Pipeline {
 			   
 	}
 	
-	public static void main(String[] args) throws InterruptedException, IOException {
+	public static void main(String[] args) throws InterruptedException, IOException, ParseException {
 		org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
 		//Set up a Web Server that exposes the QAOntology
 		try {
@@ -121,7 +127,16 @@ public class Pipeline {
 		
 		//The triplestore is initialized with the WADM, the QA ontology and some initial structures
 		pline.initTripleStore();
-	    
+		//The first component annotates the question with NE
+	    pline.firstComponent();
+	    //The second component annotates the question with relations
+		pline.secondComponent();
+		pline.thirdComponent();
+	}
+	
+	
+	public void firstComponent() throws UnsupportedEncodingException{
+		Pipeline pline = new Pipeline();
 		//Execute a SPARQL query to retrieve the URI where the question is exposed
 		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#> SELECT ?questionuri WHERE {?questionuri a qa:Question}";
 		Query query = QueryFactory.create(sparqlQuery);
@@ -136,7 +151,7 @@ public class Pipeline {
 		//Send the question to the DBpedia service
 		String a="http://localhost:8099/"+URLEncoder.encode(question, "UTF-8");
 		String qstn = rstclnt.getResults(a);
-		System.out.println(qstn);
+		//System.out.println(qstn);
 		
 		//Write into an empty file the result of the DBpedia wrapper to expose the result as a URI
 		pline.writeFile("src/vocabulary/extended/eis/de/DBpediaOutput.ttl", qstn);
@@ -181,14 +196,14 @@ public class Pipeline {
 		//All triples of the graph <http://www.wdaqua.eu/qa#tmp> are moved to the default graph 
 		sparqlQuery="ADD <http://www.wdaqua.eu/qa#tmp> to  DEFAULT";
 		pline.loadTripleStore(sparqlQuery);
+		
 		//The temporary graph is dropped
 		sparqlQuery="DROP GRAPH <http://www.wdaqua.eu/qa#tmp>";
 		pline.loadTripleStore(sparqlQuery);
-		pline.secondComponent();
+		
 	}
 	
-	
-	public void secondComponent(){
+	public void secondComponent() throws IOException, ParseException{
 		//Execute a SPARQL query to retrieve the URI where the question is exposed
 		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
 							+"SELECT ?questionuri WHERE {?questionuri a qa:Question}";
@@ -199,6 +214,8 @@ public class Pipeline {
 		//Retrieve the question using an HTTP request 
 		RESTClient rstclnt = new RESTClient();
 		String question = rstclnt.getResults(uriQuestion);
+		int length=question.length();
+		question=question.replace("?", " ");
 		
 		sparqlQuery= "prefix itsrdf: <http://www.w3.org/2005/11/its/rdf> "
 					+"prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> "
@@ -221,13 +238,87 @@ public class Pipeline {
 		query = QueryFactory.create(sparqlQuery);
 		qExe = QueryExecutionFactory.sparqlService(endpoint, query );
 		result=qExe.execSelect();
+		ArrayList<String> NE= new ArrayList<String>();
+		ArrayList<Integer> begin= new ArrayList<Integer>();
+		ArrayList<Integer> end= new ArrayList<Integer>();
 		while (result.hasNext()){
 			QuerySolution tmp = result.next();
-			System.out.println(tmp.getLiteral("NE").toString());
-			System.out.println(tmp.getLiteral("begin").getInt());
-			System.out.println(tmp.getLiteral("end").getInt());
-			
+			NE.add(tmp.getResource("NE").toString());
+			begin.add(tmp.getLiteral("begin").getInt());
+			end.add(tmp.getLiteral("end").getInt());
 		}
+		
+		//The question will be taken and all parts that where not annotated before are dropped
+		StringBuilder drop = new StringBuilder(question);
+		//int k=0; //indicates the characters already dropped
+		for (Integer i=0; i<begin.size(); i++){
+			String replace="";
+			for (Integer j=begin.get(i); j<end.get(i); j++){
+				replace+=" ";
+			}
+			drop.replace(begin.get(i)-1, end.get(i), replace);
+		}
+		String search = drop.toString();
+		//System.out.println(search);
+		Indexer ind = new Indexer();
+    	//i.index();
+		Map<Integer,String> relations=ind.search("pattern", search);
+    	
+		Pipeline pline = new Pipeline();
+		
+		for (Map.Entry<Integer,String> entry : relations.entrySet())
+    	{
+			sparqlQuery="prefix itsrdf: <http://www.w3.org/2005/11/its/rdf#> "
+					 +"prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> "
+					 +"prefix qa: <http://www.wdaqua.eu/qa#> "
+					 +"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
+					 +"prefix dbo: <http://dbpedia.org/ontology/> "
+					 +"prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
+					 +"INSERT { "
+					 +"  ?a a qa:AnnotationOfNE . "
+					 +"  ?a oa:hasBody dbo:"+entry.getValue()+" . "
+					 +"  ?a oa:hasTarget [ "
+					 +"           a    oa:SpecificResource; "
+		             +"           oa:hasSource    <"+uriQuestion+">; "
+		             +"           oa:hasSelector  [ "
+		             +"                    a oa:TextPositionSelector ; "
+		             +"                    oa:start \"0\"^^xsd:nonNegativeInteger ; "
+		             +"                    oa:end  \""+length+"\"^^xsd:nonNegativeInteger  "
+		             +"           ] "
+		             +"  ] . "
+		             +"  ?a qa:score "+entry.getKey()+" . "
+					 +"} "
+					 +"WHERE { " 
+					 +"BIND (IRI(str(RAND())) AS ?a) "    
+				     +"   }"; 
+			pline.loadTripleStore(sparqlQuery);
+		}
+	}
+	
+	public void thirdComponent(){
+		//SPARQL query to retrive the annotations of NE
+		String sparqlQuery="prefix itsrdf: <http://www.w3.org/2005/11/its/rdf> "
+			       +"prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> " 
+			       +"prefix qa: <http://www.wdaqua.eu/qa#> " 
+			       +"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
+				   +"select ?NE ?s where { "
+				   +"    ?a a qa:AnnotationOfNE . "
+				   +"    ?a oa:hasBody ?NE . "
+				   +"    ?a oa:hasTarget [ "
+			       +"	       a             oa:SpecificResource; "
+			       +"          oa:hasSource    ?r; "
+			       +" ] . "
+			       +"?a qa:score ?s "
+			 	   +"}";
+		Query query = QueryFactory.create(sparqlQuery);
+		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query );
+		ResultSet result=qExe.execSelect();
+		while (result.hasNext()){
+			QuerySolution tmp = result.next();
+			System.out.println(tmp.getResource("NE").toString());
+			System.out.println(tmp.getLiteral("s").getInt());
+		}
+
 	}
 	
 }

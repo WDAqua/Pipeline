@@ -21,7 +21,7 @@ public class WebServer extends NanoHTTPD {
         Map<String, String> header, Map<String, String> parameters,
         Map<String, String> files) {
     	
-    	System.out.println(uri);
+    	//System.out.println(uri);
 	    if (uri.equals("/QAOntology_raw.ttl")){
 	    	String answer = "";
 		    FileInputStream fis = null;
