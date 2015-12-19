@@ -35,7 +35,7 @@ import patty_wrapper.Indexer;
 public class Pipeline {
 
 	//Endpoint of Stardog
-	private static String endpoint="http://admin:admin@localhost:5820/question/query";
+	private static String endpointStardog="http://admin:admin@localhost:5820/question/query";
 	
 	
 	DBpediaSpotlight spotlight = new DBpediaSpotlight();
@@ -51,7 +51,7 @@ public class Pipeline {
 	}
 	
 	//Function to perform update requests to the endpoint
-	public void loadTripleStore(String sparqlQuery){
+	public void loadTripleStore(String sparqlQuery, String endpoint){
 		UpdateRequest request = UpdateFactory.create(sparqlQuery) ;
 		UpdateProcessor proc = UpdateExecutionFactory.createRemote(request, endpoint);
 	    proc.execute() ;
@@ -71,32 +71,32 @@ public class Pipeline {
 	
 	
 	//Function that initializes the triplestore with the WADM + the QA ontology + some inital structures
-	public void initTripleStore()
+	public void initTripleStore(String endpoint)
 	{
 				//Clear all tables of the database
 				String q="CLEAR ALL";
-				loadTripleStore(q);
+				loadTripleStore(q, endpoint);
 				
 			    //Load the Open Annotation Ontology
 			    q="LOAD <http://www.openannotation.org/spec/core/20130208/oa.owl>";
-			    loadTripleStore(q);
+			    loadTripleStore(q, endpoint);
 				
 				//Load our ontology
 				q="LOAD <http://localhost:8080/QAOntology_raw.ttl>";
-				loadTripleStore(q);
+				loadTripleStore(q, endpoint);
 				
 			    //Prepare the question, answer and dataset objects
 			    q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
 			      "INSERT DATA {<http://localhost:8080/Question> a qa:Question}";
-			    loadTripleStore(q);
+			    loadTripleStore(q, endpoint);
 			   
 			    q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
 		  	      "INSERT DATA {<http://localhost:8080/Answer> a qa:Answer}";
-			    loadTripleStore(q);
+			    loadTripleStore(q, endpoint);
 		  	    
 			  	q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
 		  		  "INSERT DATA {<http://localhost:8080/Dataset> a qa:Dataset}";
-			  	loadTripleStore(q);
+			  	loadTripleStore(q, endpoint);
 			  	
 			  	//Make the first two annotations
 			  	q="PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
@@ -109,7 +109,7 @@ public class Pipeline {
 				 +"   oa:hasTarget <URIQuestion> ;"
 				 +"   oa:hasBody   <URIDataset> "
 				 +"}";  
-				loadTripleStore(q);
+				loadTripleStore(q, endpoint);
 			   
 	}
 	
@@ -126,16 +126,16 @@ public class Pipeline {
 		Pipeline pline = new Pipeline();
 		
 		//The triplestore is initialized with the WADM, the QA ontology and some initial structures
-		pline.initTripleStore();
+		pline.initTripleStore(endpointStardog);
 		//The first component annotates the question with NE
-	    pline.firstComponent();
+	    pline.firstComponent(endpointStardog);
 	    //The second component annotates the question with relations
-		pline.secondComponent();
-		pline.thirdComponent();
+		pline.secondComponent(endpointStardog);
+		pline.thirdComponent(endpointStardog);
 	}
 	
 	
-	public void firstComponent() throws UnsupportedEncodingException{
+	public void firstComponent(String endpoint) throws UnsupportedEncodingException{
 		Pipeline pline = new Pipeline();
 		//Execute a SPARQL query to retrieve the URI where the question is exposed
 		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#> SELECT ?questionuri WHERE {?questionuri a qa:Question}";
@@ -157,7 +157,7 @@ public class Pipeline {
 		pline.writeFile("src/vocabulary/extended/eis/de/DBpediaOutput.ttl", qstn);
 		
 		//The exposed result is loaded into a temporary graph
-		pline.loadTripleStore("LOAD <http://localhost:8080/DBpediaOutput.ttl> INTO GRAPH <http://www.wdaqua.eu/qa#tmp>");
+		pline.loadTripleStore("LOAD <http://localhost:8080/DBpediaOutput.ttl> INTO GRAPH <http://www.wdaqua.eu/qa#tmp>", endpoint);
 		
 		//The binding is applied
 		sparqlQuery="prefix itsrdf: <http://www.w3.org/2005/11/its/rdf#> "
@@ -194,19 +194,19 @@ public class Pipeline {
 			 +"      } " 
 			 +"   }"
 			 +"}";
-		pline.loadTripleStore(sparqlQuery);
+		pline.loadTripleStore(sparqlQuery, endpoint);
 		
 		//All triples of the graph <http://www.wdaqua.eu/qa#tmp> are moved to the default graph 
 		sparqlQuery="ADD <http://www.wdaqua.eu/qa#tmp> to  DEFAULT";
-		pline.loadTripleStore(sparqlQuery);
+		pline.loadTripleStore(sparqlQuery, endpoint);
 		
 		//The temporary graph is dropped
 		sparqlQuery="DROP GRAPH <http://www.wdaqua.eu/qa#tmp>";
-		pline.loadTripleStore(sparqlQuery);
+		pline.loadTripleStore(sparqlQuery, endpoint);
 		
 	}
 	
-	public void secondComponent() throws IOException, ParseException{
+	public void secondComponent(String endpoint) throws IOException, ParseException{
 		//Execute a SPARQL query to retrieve the URI where the question is exposed
 		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
 							+"SELECT ?questionuri WHERE {?questionuri a qa:Question}";
@@ -297,11 +297,11 @@ public class Pipeline {
 					 +"BIND (IRI(str(RAND())) AS ?a) ."
 					 +"BIND (now() as ?time) "
 				     +"}"; 
-			pline.loadTripleStore(sparqlQuery);
+			pline.loadTripleStore(sparqlQuery, endpoint);
 		}
 	}
 	
-	public void thirdComponent(){
+	public void thirdComponent(String endpoint){
 		//SPARQL query to retrive the annotations of NE
 		String sparqlQuery="prefix itsrdf: <http://www.w3.org/2005/11/its/rdf> "
 			       +"prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> " 
