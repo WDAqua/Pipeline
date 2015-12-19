@@ -22,7 +22,7 @@ qa:Answer	rdf:type owl:Class .
 qa:Dataset	rdf:type owl:Class .
 
 #Introducing additional properties
-qa:confidence  rdf:type owl:DatatypeProperty ;
+qa:score  rdf:type owl:DatatypeProperty ;
 		rdfs:comment "Describes the confidence/trust we have in the Annotation."@en ;
                rdfs:range xsd:decimal ;
                rdfs:domain <http://www.w3.org/ns/oa#Annotation> .
