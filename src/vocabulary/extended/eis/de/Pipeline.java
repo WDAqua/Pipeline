@@ -289,11 +289,14 @@ public class Pipeline {
 		             +"                    oa:end  \""+length+"\"^^xsd:nonNegativeInteger  "
 		             +"           ] "
 		             +"  ] . "
-		             +"  ?a qa:score "+entry.getKey()+" . "
-					 +"} "
+		             +"  ?a qa:score "+entry.getKey()+" ; "
+		             +"     oa:annotatedBy <http://wdaqua.example/Patty> ; "
+		             +"	    oa:AnnotatedAt ?time  "
+ 					 +"} "
 					 +"WHERE { " 
-					 +"BIND (IRI(str(RAND())) AS ?a) "    
-				     +"   }"; 
+					 +"BIND (IRI(str(RAND())) AS ?a) ."
+					 +"BIND (now() as ?time) "
+				     +"}"; 
 			pline.loadTripleStore(sparqlQuery);
 		}
 	}
