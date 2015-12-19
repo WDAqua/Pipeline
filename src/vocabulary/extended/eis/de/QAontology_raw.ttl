@@ -104,9 +104,9 @@ qa:AnnoOfPosTag rdf:type owl:Class ;
                                     ] ;
                 rdfs:subClassOf qa:AnnotationQuestion .
 
-qa:NE rdf:type owl:Class .
+qa:Entity rdf:type owl:Class .
 
-qa:AnnoOfNE rdf:type owl:Class ;
+qa:AnnotationOfEntity rdf:type owl:Class ;
 
                 owl:equivalentClass [ rdf:type owl:Restriction ;
                                       owl:onProperty <http://www.w3.org/ns/oa#hasBody> ;
