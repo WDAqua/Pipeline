@@ -71,44 +71,45 @@ public class Pipeline {
 	
 	
 	//Function that initializes the triplestore with the WADM + the QA ontology + some inital structures
-	public void initTripleStore(String endpoint)
+	public void initTripleStore(String endpoint, String namedGraph)
 	{
 				//Clear all tables of the database
 				String q="CLEAR ALL";
 				loadTripleStore(q, endpoint);
 				
 			    //Load the Open Annotation Ontology
-			    q="LOAD <http://www.openannotation.org/spec/core/20130208/oa.owl>";
+			    q="LOAD <http://www.openannotation.org/spec/core/20130208/oa.owl> INTO GRAPH "+ namedGraph;
 			    loadTripleStore(q, endpoint);
 				
 				//Load our ontology
-				q="LOAD <http://localhost:8080/QAOntology_raw.ttl>";
+				q="LOAD <http://localhost:8080/QAOntology_raw.ttl> INTO GRAPH"+ namedGraph;
 				loadTripleStore(q, endpoint);
 				
 			    //Prepare the question, answer and dataset objects
 			    q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
-			      "INSERT DATA {<http://localhost:8080/Question> a qa:Question}";
+			      "INSERT DATA {GRAPH "+namedGraph+"{ <http://localhost:8080/Question> a qa:Question}}";
 			    loadTripleStore(q, endpoint);
 			   
 			    q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
-		  	      "INSERT DATA {<http://localhost:8080/Answer> a qa:Answer}";
+		  	      "INSERT DATA {GRAPH "+namedGraph+"{<http://localhost:8080/Answer> a qa:Answer}}";
 			    loadTripleStore(q, endpoint);
 		  	    
 			  	q="PREFIX qa: <http://www.wdaqua.eu/qa#>"+
-		  		  "INSERT DATA {<http://localhost:8080/Dataset> a qa:Dataset}";
+		  		  "INSERT DATA {GRAPH "+namedGraph+"{<http://localhost:8080/Dataset> a qa:Dataset}}";
 			  	loadTripleStore(q, endpoint);
 			  	
 			  	//Make the first two annotations
 			  	q="PREFIX oa: <http://www.w3.org/ns/openannotation/core/> "
 			  	 +"PREFIX qa: <http://www.wdaqua.eu/qa#> "
 			  	 +"INSERT DATA { "
+			  	 +"GRAPH "+namedGraph+"{ "
 			  	 +"<anno1> a  oa:AnnotationOfQuestion; "
 				 +"   oa:hasTarget <URIQuestion> ;"
 				 +"   oa:hasBody   <URIAnswer>   ."
 				 +"<anno2> a  oa:AnnotationOfQuestion;"
 				 +"   oa:hasTarget <URIQuestion> ;"
 				 +"   oa:hasBody   <URIDataset> "
-				 +"}";  
+				 +"}}";  
 				loadTripleStore(q, endpoint);
 			   
 	}
@@ -126,19 +127,20 @@ public class Pipeline {
 		Pipeline pline = new Pipeline();
 		
 		//The triplestore is initialized with the WADM, the QA ontology and some initial structures
-		pline.initTripleStore(endpointStardog);
+		pline.initTripleStore(endpointStardog, "<http://wdaqua.eu/namedGraph>");
 		//The first component annotates the question with NE
-	    pline.firstComponent(endpointStardog);
+	    pline.firstComponent(endpointStardog, "<http://wdaqua.eu/namedGraph>");
 	    //The second component annotates the question with relations
-		pline.secondComponent(endpointStardog);
-		pline.thirdComponent(endpointStardog);
+		pline.secondComponent(endpointStardog,"<http://wdaqua.eu/namedGraph>");
+		//The third component retrives the named entities and tris to build a SPARQL query
+		pline.thirdComponent(endpointStardog,"<http://wdaqua.eu/namedGraph>");
 	}
 	
 	
-	public void firstComponent(String endpoint) throws UnsupportedEncodingException{
+	public void firstComponent(String endpoint, String namedGraph) throws UnsupportedEncodingException{
 		Pipeline pline = new Pipeline();
 		//Execute a SPARQL query to retrieve the URI where the question is exposed
-		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#> SELECT ?questionuri WHERE {?questionuri a qa:Question}";
+		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#> SELECT ?questionuri FROM "+namedGraph+" WHERE {?questionuri a qa:Question}";
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query );
 		ResultSet result=qExe.execSelect();
@@ -166,6 +168,7 @@ public class Pipeline {
 			 +"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 			 +""
 			 +"INSERT { "
+			 +   "GRAPH "+namedGraph+" { "
 			 +"  ?s a oa:TextPositionSelector . "
 			 +"  ?s oa:start ?begin . "
 			 +"  ?s oa:end ?end . "
@@ -180,7 +183,7 @@ public class Pipeline {
              +"  ?a qa:score ?conf . "
              +"  ?a oa:annotatedBy 'DBpedia Spotlight wrapper' . "
              +"  ?a oa:annotatedAt ?time "
-			 +"} " 
+			 +"}} " 
 			 +"WHERE { "
 			 +"  SELECT ?a ?s ?NE ?begin ?end ?conf "
 			 +"  WHERE { " 
@@ -197,7 +200,7 @@ public class Pipeline {
 		pline.loadTripleStore(sparqlQuery, endpoint);
 		
 		//All triples of the graph <http://www.wdaqua.eu/qa#tmp> are moved to the default graph 
-		sparqlQuery="ADD <http://www.wdaqua.eu/qa#tmp> to  DEFAULT";
+		sparqlQuery="ADD <http://www.wdaqua.eu/qa#tmp> to "+namedGraph;
 		pline.loadTripleStore(sparqlQuery, endpoint);
 		
 		//The temporary graph is dropped
@@ -206,10 +209,10 @@ public class Pipeline {
 		
 	}
 	
-	public void secondComponent(String endpoint) throws IOException, ParseException{
+	public void secondComponent(String endpoint, String namedGraph) throws IOException, ParseException{
 		//Execute a SPARQL query to retrieve the URI where the question is exposed
 		String sparqlQuery = "PREFIX qa:<http://www.wdaqua.eu/qa#> "
-							+"SELECT ?questionuri WHERE {?questionuri a qa:Question}";
+							+"SELECT ?questionuri FROM "+namedGraph+" WHERE {?questionuri a qa:Question}";
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query );
 		ResultSet result=qExe.execSelect();
@@ -225,7 +228,9 @@ public class Pipeline {
 					+"prefix qa: <http://www.wdaqua.eu/qa#> " 
 					+"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
 					+""
-					+"SELECT ?NE ?begin ?end WHERE { "
+					+"SELECT ?NE ?begin ?end "
+					+"FROM "+ namedGraph + " "
+					+"WHERE { "
 					+"    ?a a qa:AnnotationOfEntity . "
 					+"    ?a oa:hasBody ?NE . "
 					+"    ?a oa:hasTarget [ "
@@ -278,6 +283,7 @@ public class Pipeline {
 					 +"prefix dbo: <http://dbpedia.org/ontology/> "
 					 +"prefix xsd: <http://www.w3.org/2001/XMLSchema#> "
 					 +"INSERT { "
+					 +"GRAPH "+namedGraph+" { "
 					 +"  ?a a qa:AnnotationOfEntity . "
 					 +"  ?a oa:hasBody dbo:"+entry.getValue()+" . "
 					 +"  ?a oa:hasTarget [ "
@@ -292,7 +298,7 @@ public class Pipeline {
 		             +"  ?a qa:score "+entry.getKey()+" ; "
 		             +"     oa:annotatedBy <http://wdaqua.example/Patty> ; "
 		             +"	    oa:AnnotatedAt ?time  "
- 					 +"} "
+ 					 +"}} "
 					 +"WHERE { " 
 					 +"BIND (IRI(str(RAND())) AS ?a) ."
 					 +"BIND (now() as ?time) "
@@ -301,13 +307,15 @@ public class Pipeline {
 		}
 	}
 	
-	public void thirdComponent(String endpoint){
+	public void thirdComponent(String endpoint, String namedGraph){
 		//SPARQL query to retrive the annotations of NE
 		String sparqlQuery="prefix itsrdf: <http://www.w3.org/2005/11/its/rdf> "
 			       +"prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> " 
 			       +"prefix qa: <http://www.wdaqua.eu/qa#> " 
 			       +"prefix oa: <http://www.w3.org/ns/openannotation/core/> "
-				   +"select ?NE ?s where { "
+				   +"SELECT ?NE ?s "
+				   +"FROM "+ namedGraph + " "
+				   +"WHERE { "
 				   +"    ?a a qa:AnnotationOfEntity . "
 				   +"    ?a oa:hasBody ?NE . "
 				   +"    ?a oa:hasTarget [ "
