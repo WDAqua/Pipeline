@@ -18,17 +18,20 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.update.UpdateExecutionFactory;
-import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateProcessor;
-import org.apache.jena.update.UpdateRequest;
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.update.UpdateExecutionFactory;
+import com.hp.hpl.jena.update.UpdateFactory;
+import com.hp.hpl.jena.update.UpdateProcessor;
+import com.hp.hpl.jena.update.UpdateRequest;
 import org.apache.lucene.queryparser.classic.ParseException;
+
+import Main.main; //This is the SINA import
+import model.*;
 
 import patty_wrapper.Indexer;
 
@@ -115,6 +118,7 @@ public class Pipeline {
 	}
 	
 	public static void main(String[] args) throws InterruptedException, IOException, ParseException {
+		
 		org.apache.log4j.Logger.getRootLogger().setLevel(org.apache.log4j.Level.OFF);
 		//Set up a Web Server that exposes the QAOntology
 		try {
@@ -332,6 +336,11 @@ public class Pipeline {
 			System.out.println(tmp.getResource("NE").toString());
 			System.out.println(tmp.getLiteral("s").getInt());
 		}
+		
+		List<String> sparqlQueries =Main.main.run("http://dbpedia.org/resource/Barack_Obama,  http://dbpedia.org/ontology/almaMater");
+		//Main.main.main(null);
+		System.out.println(sparqlQueries);
+		
 
 	}
 	
