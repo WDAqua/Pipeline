@@ -30,7 +30,7 @@ python3 dbpediaspotlight_client_service.py --example "example5.ttl" --port 8099
 
 Save the changes.
 
-(6) Now to build the Mavan Pipeline project, follow following steps in your IDE
+(6) Now to build the Mavan Pipeline project, follow following steps in your IDE -->>
 (6.1) mvn clean
 (6.2) mvn install
 (6.3) mvn build
