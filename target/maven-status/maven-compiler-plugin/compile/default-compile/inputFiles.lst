@@ -1,8 +1,9 @@
-/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/PipelineTests.java
-/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/PattyRelationIdentifier.java
-/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/DBpediaSpotlight.java
-/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/Sina.java
-/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/QAComponent.java
-/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/Pipeline.java
-/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/RESTClient.java
-/Users/kulsingh/Documents/workspace/Pipeline/src/vocabulary/extended/eis/de/WebServer.java
+/Users/kulsingh/Documents/workspace/Pipe/src/patty_wrapper/Indexer.java
+/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/Pipeline.java
+/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/DBpediaSpotlight.java
+/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/WebServer.java
+/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/PattyRelationIdentifier.java
+/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/RESTClient.java
+/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/QAComponent.java
+/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/PipelineTests.java
+/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/Sina.java

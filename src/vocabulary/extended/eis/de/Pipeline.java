@@ -160,7 +160,7 @@ public class Pipeline {
 		//System.out.println(qstn);
 		
 		//Write into an empty file the result of the DBpedia wrapper to expose the result as a URI
-		pline.writeFile("src/vocabulary/extended/eis/de/DBpediaOutput.ttl", qstn);
+		pline.writeFile("/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/DBpediaOutput.ttl", qstn);
 		
 		//The exposed result is loaded into a temporary graph
 		pline.loadTripleStore("LOAD <http://localhost:8080/DBpediaOutput.ttl> INTO GRAPH <http://www.wdaqua.eu/qa#tmp>", endpoint);
@@ -273,7 +273,7 @@ public class Pipeline {
 		String search = drop.toString();
 		//System.out.println(search);
 		Indexer ind = new Indexer();
-    	//i.index();
+    	ind.index();
 		Map<Integer,String> relations=ind.search("pattern", search);
     	
 		Pipeline pline = new Pipeline();
@@ -331,13 +331,17 @@ public class Pipeline {
 		Query query = QueryFactory.create(sparqlQuery);
 		QueryExecution qExe = QueryExecutionFactory.sparqlService(endpoint, query );
 		ResultSet result=qExe.execSelect();
+		ArrayList<String> neList = new ArrayList<String>();
+		ArrayList<String> sList = new ArrayList<String>();
 		while (result.hasNext()){
 			QuerySolution tmp = result.next();
-			System.out.println(tmp.getResource("NE").toString());
-			System.out.println(tmp.getLiteral("s").getInt());
+			neList.add(tmp.getResource("NE").toString());
+			//sList.add(tmp.getResource("s").toString());
+			//System.out.println(tmp.getResource("NE").toString());
+			//System.out.println(tmp.getLiteral("s").getInt());
 		}
 		
-		List<String> sparqlQueries =Main.main.run("http://dbpedia.org/resource/Barack_Obama,  http://dbpedia.org/ontology/almaMater");
+		List<String> sparqlQueries = Main.main.run(neList.get(1)+","+  neList.get(0));
 		//Main.main.main(null);
 		System.out.println(sparqlQueries);
 		

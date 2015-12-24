@@ -71,7 +71,7 @@ public class Indexer {
 			//4. add a sample document to the index
 			
 			
-			BufferedReader br = new BufferedReader(new FileReader("src/patty_wrapper/dbpedia-relation-paraphrases.txt"));
+			BufferedReader br = new BufferedReader(new FileReader("/Users/kulsingh/Documents/workspace/Pipe/src/patty_wrapper/dbpedia-relation-paraphrases.txt"));
 			String line = br.readLine();
 			while (line != null) {
 				String[] fields = line.split("\\t| ");

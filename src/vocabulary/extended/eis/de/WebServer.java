@@ -26,7 +26,7 @@ public class WebServer extends NanoHTTPD {
 	    	String answer = "";
 		    FileInputStream fis = null;
 		    try {
-		        fis = new FileInputStream("src/vocabulary/extended/eis/de/QAOntology_raw.ttl");
+		        fis = new FileInputStream("/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/QAOntology_raw.ttl");
 		    } catch (FileNotFoundException e) {
 		        // TODO Auto-generated catch block
 		        e.printStackTrace();
@@ -38,7 +38,7 @@ public class WebServer extends NanoHTTPD {
 	    	String answer = "";
 		    FileInputStream fis = null;
 		    try {
-		        fis = new FileInputStream("src/vocabulary/extended/eis/de/DBpediaOutput.ttl");
+		        fis = new FileInputStream("/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/DBpediaOutput.ttl");
 		    } catch (FileNotFoundException e) {
 		        // TODO Auto-generated catch block
 		    	System.out.println(uri+" caught in Exeption");
@@ -52,7 +52,7 @@ public class WebServer extends NanoHTTPD {
 	    	String answer = "";
 		    FileInputStream fis = null;
 		    try {
-		        fis = new FileInputStream("src/vocabulary/extended/eis/de/Question");
+		        fis = new FileInputStream("/Users/kulsingh/Documents/workspace/Pipe/src/vocabulary/extended/eis/de/Question");
 		    } catch (FileNotFoundException e) {
 		        // TODO Auto-generated catch block
 		        e.printStackTrace();

@@ -4,5 +4,6 @@ vocabulary/extended/eis/de/WebServer.class
 vocabulary/extended/eis/de/Sina.class
 vocabulary/extended/eis/de/PattyRelationIdentifier.class
 vocabulary/extended/eis/de/RESTClient.class
+patty_wrapper/Indexer.class
 vocabulary/extended/eis/de/DBpediaSpotlight.class
 vocabulary/extended/eis/de/QAComponent.class

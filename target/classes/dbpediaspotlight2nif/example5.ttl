@@ -1,0 +1,18 @@
+# input: 
+# Where did Barack Obama graduated?
+# note: done by manual annotations as DBpedia Spotlight is down
+@prefix itsrdf: <http://www.w3.org/2005/11/its/rdf#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix nif: <http://persistence.uni-leipzig.org/nlp2rdf/ontologies/nif-core#> .
+
+@base <urn:uuid:630454ad-dddd-456a-b6a4-33b07e1b7f77> .
+
+
+<#char=11,23>
+                             a	nif:RFC5147String, nif:Phrase, nif:OffsetBasedString ;
+                nif:beginIndex	"11"^^xsd:nonNegativeInteger ;
+                  nif:endIndex	"23"^^xsd:nonNegativeInteger ;
+                  nif:anchorOf	"person" ;
+                nif:confidence	"1.0"^^xsd:decimal;
+          nif:referenceContext	"<#char=11,23>" ;
+             itsrdf:taIdentRef	<http://dbpedia.org/resource/Barack_Obama> .
