@@ -4,7 +4,7 @@ To the the Project Pipeline, here is the detailed description:
 
 Qanary-An Extensible Vocabulary for Open Question Answering Systems contains three component. In our Project Pipeline, these three components are DBpediaSpotlight, Patty Relation Identifier, and SINA.
 
-To run the Poroject, please follow following Steps.
+To run the Project, please follow following Steps.
 (Note that the Project Pipeline is Maven build)
 
 {
@@ -23,6 +23,9 @@ d. create a local triplestore named question in Stardog following its instructio
 
 python3 dbpediaspotlight_client_service.py --example "example5.ttl" --port 8099 
 
+
+Please note that to run the first component, we have used an example Turtle file. This is because DBpedia Spotlight service was down and still face some problems. As our main goal in the project is to show the interoperability using QANARY vocabulary instead the actual working of the Question Answering System, therefore we have taken an example to display output of DBpedia Spotlight and then bind it using QANARY vocabulary to push into the Triplestore.
+
 (4) Now go to the Pipeline/src/vocabulary/extended/eis/de/Pipeline.java file, and in line number 163 of the code, changed the path of the file and point it to your local.
 
 (5) Go to the Pipeline/src/patty_wrapper/Indexer.java, and in line 74, change the path to your local.
@@ -40,7 +43,7 @@ Save the changes.
 (8) Now run the .jar created in step 6 by running following command in your terminal
 java -jar Pipeline-0.0.1-SNAPSHOT.jar
 
-Step 8 will display the SPARQL query generated out of Question string fed into first component (i.e. DBpediaSpotlight) on your terminal
+Step 8 will display the SPARQL query generated out of Question string fed into first component (i.e. DBpediaSpotlight) on your terminal. This step display the final output and evaulate our claim that interoperability using QANARY vocabulary can be possible. We have taken three different components, bind it to our vocabulary to demostrate the examplary working or a message driven approach of QA system.
 
 
 
