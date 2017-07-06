@@ -1,3 +1,8 @@
+
+Dear Viewers, the Project now (as of June 2017) has evolved a lot since this publication in ESWC 2016. Our Current working Git link is: https://github.com/WDAqua/Qanary.
+Also, the permanent email of the authors of this paper are: Kuldeep Singh- Kskuldeepvit@gmail.com, Andreas Both: andreas.both.de@gmail.com. For any question reach out to us. 
+
+For understanding the implementation point of view of ESWC research article, please read the following:
 # Pipeline
 
 To the the Project Pipeline, here is the detailed description:
